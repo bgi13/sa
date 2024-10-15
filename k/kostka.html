@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kostka do Gry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #dice {
+            font-size: 100px;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="dice">🎲</div>
+    <button onclick="rollDice()">Rzuć kostką</button>
+
+    <script>
+        function rollDice() {
+            const diceRoll = Math.floor(Math.random() * 6) + 1;
+            const diceFace = ['🎲', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            document.getElementById('dice').innerText = diceFace[diceRoll];
+            animateDice();
+        }
+
+        function animateDice() {
+            const dice = document.getElementById('dice');
+            dice.style.transition = 'transform 0.2s';
+            dice.style.transform = 'rotateY(180deg)';
+            setTimeout(() => {
+                dice.style.transform = 'rotateY(0deg)';
+            }, 200);
+        }
+    </script>
+</body>
+</html>
