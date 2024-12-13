@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikacja do rysowania</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+            height: 100vh;
+        }
+        #toolbar {
+            display: flex;
+            gap: 10px;
+            margin: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #canvas-container {
+            position: relative;
+            border: 2px solid #555;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            cursor: crosshair;
+            touch-action: none;
+        }
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background: #007BFF;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input[type="range"] {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <label>
+            Grubość pisaka:
+            <input type="range" id="penSize" min="1" max="20" value="5">
+        </label>
+        <label>
+            Kolor:
+            <input type="color" id="penColor" value="#000000">
+        </label>
+        <button id="eraser">Gumka</button>
+        <button id="undo">Wstecz</button>
+        <button id="redo">Wprzód</button>
+        <input type="file" id="uploadImage" accept="image/*">
+    </div>
+    <div id="canvas-container">
+        <canvas id="drawingCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const penSizeInput = document.getElementById('penSize');
+        const penColorInput = document.getElementById('penColor');
+        const eraserButton = document.getElementById('eraser');
+        const undoButton = document.getElementById('undo');
+        const redoButton = document.getElementById('redo');
+        const uploadImageInput = document.getElementById('uploadImage');
+
+        let drawing = false;
+        let penSize = penSizeInput.value;
+        let penColor = penColorInput.value;
+        let isErasing = false;
+        let history = [];
+        let redoStack = [];
+
+        const saveState = () => {
+            history.push(canvas.toDataURL());
+            redoStack = [];
+        };
+
+        const getTouchPos = (touch) => {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+        };
+
+        canvas.addEventListener('mousedown', () => {
+            drawing = true;
+            saveState();
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            drawing = true;
+            saveState();
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            drawing = false;
+            ctx.beginPath();
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            drawing = false;
+            ctx.beginPath();
+            e.preventDefault();
+        });
+
+        const draw = (x, y) => {
+            ctx.lineWidth = penSize;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = isErasing ? '#ffffff' : penColor;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        };
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            draw(x, y);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!drawing) return;
+            const touch = e.touches[0];
+            const pos = getTouchPos(touch);
+            draw(pos.x, pos.y);
+            e.preventDefault();
+        });
+
+        penSizeInput.addEventListener('input', (e) => {
+            penSize = e.target.value;
+        });
+
+        penColorInput.addEventListener('input', (e) => {
+            penColor = e.target.value;
+            isErasing = false;
+        });
+
+        eraserButton.addEventListener('click', () => {
+            isErasing = true;
+        });
+
+        undoButton.addEventListener('click', () => {
+            if (history.length > 0) {
+                redoStack.push(history.pop());
+                const img = new Image();
+                img.src = history[history.length - 1] || '';
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+        });
+
+        redoButton.addEventListener('click', () => {
+            if (redoStack.length > 0) {
+                const img = new Image();
+                const state = redoStack.pop();
+                history.push(state);
+                img.src = state;
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+        });
+
+        uploadImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    URL.revokeObjectURL(img.src);
+                };
+            }
+        });
+    </script>
+</body>
+</html>
