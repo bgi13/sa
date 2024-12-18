@@ -3,49 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trzy Kolumny z iframe</title>
+    <title>Układ 3 kolumn</title>
     <style>
+        /* Ogólny styl dla całej strony */
         body {
-            display: flex;
             margin: 0;
+            padding: 0;
+            display: flex;
             height: 100vh;
         }
 
-        .left {
-            width: 65%;
+        /* Kolumna lewa */
+        .left-column {
+            flex: 1;
             height: 100%;
+            border-right: 1px solid #ddd;
         }
 
-        .right {
-            width: 35%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+        /* Kolumna prawa - górna */
+        .right-column-top {
+            width: 300px;
+            height: 50%;
+            border-bottom: 1px solid #ddd;
         }
 
-        .iframe-container {
-            border: 1px solid #000;
-            height: 48%;
+        /* Kolumna prawa - dolna */
+        .right-column-bottom {
+            width: 300px;
+            height: 50%;
         }
 
         iframe {
             width: 100%;
             height: 100%;
+            border: none;
         }
     </style>
 </head>
 <body>
-    <div class="left">
-        <iframe src="/main.html" title="Główny iframe"></iframe>
+
+    <!-- Lewa kolumna -->
+    <div class="left-column">
+        <iframe src="/glowny.html" title="Główne iframe"></iframe>
     </div>
-    
-    <div class="right">
-        <div class="iframe-container">
-            <iframe src="/kolumna1.html" title="Prawy górny iframe"></iframe>
+
+    <!-- Prawa kolumna -->
+    <div class="right-column">
+        <div class="right-column-top">
+            <iframe src="/gora.html" title="Prawy górny iframe"></iframe>
         </div>
-        <div class="iframe-container">
-            <iframe src="/kolumna2.html" title="Prawy dolny iframe"></iframe>
+        <div class="right-column-bottom">
+            <iframe src="/dol.html" title="Prawy dolny iframe"></iframe>
         </div>
     </div>
+
 </body>
 </html>
